@@ -1,3 +1,4 @@
-/Backend/venv
 /textpigeon/node_modules
 /textpigeon/.env
+/Backend/node_modules
+/Backend/.env

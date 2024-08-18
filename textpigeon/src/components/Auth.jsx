@@ -2,7 +2,7 @@ import { React, useState } from 'react';
 import Cookies from 'universal-cookie';
 import axios from 'axios';
 
-import signUpImage from "../assets/signup.jpg";
+const cookies = new Cookies();
 
 const initialState = {
     fullName: '',
@@ -14,6 +14,7 @@ const initialState = {
 const Auth = () => {
     const [form, setForm] = useState(initialState);
     const [isSignup, setIsSignup] = useState(true);
+    const [mismatchedPassword, setMismatchedPassword] = useState(false);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,8 +24,42 @@ const Auth = () => {
         setIsSignup(!isSignup);
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const { fullName, username, password, confirmPassword } = form;
+
+        const URL = "http://localhost:5000/auth";
+
+        if (isSignup) {
+            if (password !== confirmPassword) {
+                setMismatchedPassword(true);
+            } else {
+                const { data: { token, userId, hashedPassword } } = await axios.post(`${URL}/signup`, {
+                    username, fullName, password
+                })
+
+                cookies.set('token', token);
+                cookies.set('username', username);
+                cookies.set('fullName', fullName);
+                cookies.set('userId', userId);
+                cookies.set('hashedPassword', hashedPassword);
+
+                window.location.reload();
+            }
+        } else {
+            const { data: { token, userId } } = await axios.post(`${URL}/login`, {
+                username, password
+            })
+
+            cookies.set('token', token);
+            cookies.set('username', username);
+            cookies.set('fullName', fullName);
+            cookies.set('userId', userId);
+
+            window.location.reload();
+            
+        }
     }
 
     return (
@@ -64,7 +99,7 @@ const Auth = () => {
                                     onChange={handleChange}
                                     required
                                 />
-                            </div>
+                            </div>  
                         {isSignup && (
                             <div className="auth__form-container_fields-content_input">
                                 <label htmlFor="confirmPassword">Confirm Password</label>
@@ -77,6 +112,7 @@ const Auth = () => {
                                 />
                             </div>
                             )}
+                            { mismatchedPassword && <div style={{ color:"red" }}>Error. Passwords do not match.</div>}
                         <div className="auth__form-container_fields-content_button">
                             <button>{isSignup ? "Sign Up" : "Sign In"}</button>
                         </div>

@@ -9,7 +9,7 @@ const stream_app_id = process.env.STREAM_APP_ID;
 const stream_api_key = process.env.STREAM_API_KEY;
 const stream_secret = process.env.STREAM_SECRET;
 
-const login = async (req, res) => {
+const signup = async (req, res) => {
     try {
         const { fullName, username, password } = req.body;
 
@@ -29,7 +29,7 @@ const login = async (req, res) => {
     }
 }
 
-const signup = async (req, res) => {
+const login = async (req, res) => {
     try {
         const { username, password } = req.body;
 

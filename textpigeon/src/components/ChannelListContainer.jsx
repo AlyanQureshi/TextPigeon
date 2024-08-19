@@ -28,8 +28,8 @@ const CompanyHeader = () => (
         <p className="channel-list__header__text">Text Pigeon</p>
     </div>
 );
-
-const ChannelListContainer = () => {
+// 
+const ChannelListContainer = ({ isCreating, setIsCreating, setCreateType, setIsEditing }) => {
     const logout = () => {
         cookies.remove("token");
         cookies.remove("userId");
@@ -53,6 +53,10 @@ const ChannelListContainer = () => {
                         <TeamChannelList 
                             {...props}
                             type="team"
+                            isCreating={isCreating}
+                            setIsCreating={setIsCreating}
+                            setCreateType={setCreateType}
+                            setIsEditing={setIsEditing}
                         />
                     )}
                     Preview={(props) => (
@@ -66,9 +70,13 @@ const ChannelListContainer = () => {
                     filters={{}}
                     channelRenderFilterFn={() => {}}
                     List={(props) => (
-                        <TeamChannelList 
+                        <TeamChannelList
                             {...props}
                             type="messaging"
+                            isCreating={isCreating}
+                            setIsCreating={setIsCreating}
+                            setCreateType={setCreateType}
+                            setIsEditing={setIsEditing}
                         />
                     )}
                     Preview={(props) => (

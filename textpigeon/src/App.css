@@ -198,9 +198,14 @@
     box-shadow: rgba(0, 0, 0, 0.33) 0px 1px 4px 0px;
   }
   
+  .str-chat__li:hover {
+    background-color: #f0f0f0;
+  }
+
   .str-chat-channel-list {
     height: fit-content;
     margin-bottom: 8px;
+    background-color: #005fff;
   }
   
   .str-chat-channel {

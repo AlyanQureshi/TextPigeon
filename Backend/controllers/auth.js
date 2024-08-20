@@ -8,7 +8,7 @@ require('dotenv').config();
 const stream_app_id = process.env.STREAM_APP_ID;
 const stream_api_key = process.env.STREAM_API_KEY;
 const stream_secret = process.env.STREAM_SECRET;
-
+// implement email verification system with a database that can verify if users have not been logged in before
 const signup = async (req, res) => {
     try {
         const { fullName, username, password } = req.body;
@@ -40,7 +40,7 @@ const login = async (req, res) => {
         const { users } = await client.queryUsers({ name: username });
 
         if(!users.length) 
-            return res.status(400).json({ message: 'Username not found' });
+            return res.status(400).json({ message: 'Username not found.' });
 
         const success = await bcrypt.compare(password, users[0].hashedPassword);
 
@@ -49,7 +49,7 @@ const login = async (req, res) => {
 
             res.status(200).json({ token, fullName: users[0].fullName, username, userId: users[0].id});
         } else {
-            res.status(500).json({ message: 'Incorrect password' });
+            res.status(500).json({ message: 'Incorrect password.' });
         }
         
     } catch (error) {

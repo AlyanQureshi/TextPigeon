@@ -203,7 +203,8 @@
   }
 
   .str-chat-channel-list {
-    height: fit-content;
+    display: flex;
+    /* height: fit-content; */
     margin-bottom: 8px;
     background-color: #005fff;
   }

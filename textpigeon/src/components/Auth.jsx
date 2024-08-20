@@ -14,52 +14,68 @@ const initialState = {
 const Auth = () => {
     const [form, setForm] = useState(initialState);
     const [isSignup, setIsSignup] = useState(true);
-    const [mismatchedPassword, setMismatchedPassword] = useState(false);
+    const [error, setError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     }
 
     const switchMode = () => {
-        setIsSignup(!isSignup);
+        setIsSignup((prevSignup) => !prevSignup);
+        setError(false);
+        setErrorMessage("");
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const { fullName, username, password, confirmPassword } = form;
+        const { username, password, confirmPassword } = form;
 
         const URL = "http://localhost:5000/auth";
 
         if (isSignup) {
             if (password !== confirmPassword) {
-                setMismatchedPassword(true);
+                setError(true);
+                setErrorMessage("Signup Error: Passwords do not match.");
             } else {
-                const { data: { token, userId, hashedPassword } } = await axios.post(`${URL}/signup`, {
-                    username, fullName, password
-                })
-
-                cookies.set('token', token);
-                cookies.set('username', username);
-                cookies.set('fullName', fullName);
-                cookies.set('userId', userId);
-                cookies.set('hashedPassword', hashedPassword);
-
-                window.location.reload();
+                try {
+                    const { data: { token, userId, hashedPassword, fullName } } = await axios.post(`${URL}/signup`, {
+                        username, fullName: form.fullName, password
+                    })
+    
+                    cookies.set('token', token);
+                    cookies.set('username', username);
+                    cookies.set('fullName', fullName);
+                    cookies.set('userId', userId);
+                    cookies.set('hashedPassword', hashedPassword);
+    
+                    window.location.reload();
+                } catch (error) {
+                    setError(true);
+                    setErrorMessage(`Signup Error: ${error.response?.data?.message}`);
+                }
             }
         } else {
-            const { data: { token, userId } } = await axios.post(`${URL}/login`, {
-                username, password
-            })
+            try {
+                const response = await axios.post(`${URL}/login`, {
+                    username, password
+                });
+    
+                const { token, userId, fullName } = response.data;
+    
+                cookies.set('token', token);
+                cookies.set('username', username);
+                cookies.set('fullName', fullName || form.fullName);
+                cookies.set('userId', userId);
 
-            cookies.set('token', token);
-            cookies.set('username', username);
-            cookies.set('fullName', fullName);
-            cookies.set('userId', userId);
-
-            window.location.reload();
-            
-        }
+                window.location.reload();
+                
+            } catch (error) {
+                setError(true);
+                setErrorMessage(`Login Error: ${error.response?.data?.message}`);
+            }
+        }  
     }
 
     return (
@@ -112,7 +128,7 @@ const Auth = () => {
                                 />
                             </div>
                             )}
-                            { mismatchedPassword && <div style={{ color:"red" }}>Error. Passwords do not match.</div>}
+                            { error && <div style={{ color:"red" }}>{errorMessage}</div>}
                         <div className="auth__form-container_fields-content_button">
                             <button>{isSignup ? "Sign Up" : "Sign In"}</button>
                         </div>

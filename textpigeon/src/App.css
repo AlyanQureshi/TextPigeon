@@ -386,8 +386,8 @@
   }
   
   .channel-list__sidebar__icon1 {
-    width: 44px;
-    height: 44px;
+    width: 47px;
+    height: 47px;
     margin: 14px;
     background: linear-gradient(
         150.64deg,
@@ -397,6 +397,7 @@
       #ffffff;
     border-radius: 9999px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.33);
+    cursor: pointer;
   }
   
   .channel-list__list__wrapper {
@@ -415,8 +416,8 @@
   }
   
   .channel-list__sidebar__icon2 {
-    width: 44px;
-    height: 44px;
+    width: 47px;
+    height: 47px;
     margin: 14px;
     background: linear-gradient(
         150.64deg,
@@ -440,6 +441,7 @@
   .channel-list__header {
     padding-left: 16px;
     height: 62px;
+    border-bottom: 1px solid #00000033;
   }
   
   .channel-list__header__text {
@@ -457,7 +459,7 @@
     justify-content: center;
     align-items: center;
     padding-top: 16px;
-    border-top: 1px solid #00000033;
+    /* border-top: 1px solid #00000033; */
   }
   
   .channel-search__input__wrapper {
@@ -1710,11 +1712,11 @@
     outline: none;
   }
   
-  .team-channerl-header_menu-icon {
+  .team-channel-header_menu-icon {
     display: none;
   }
   
-  .channerl-list__container-toggle {
+  .channel-list__container-toggle {
     display: none;
     height: 50px;
     width: 50px;
@@ -1747,7 +1749,7 @@
       display: none;
     }
   
-    .team-channerl-header_menu-icon {
+    .team-channel-header_menu-icon {
       display: flex;
     }
   
@@ -1785,7 +1787,7 @@
       width: 100%;
     }
   
-    .channerl-list__container-toggle {
+    .channel-list__container-toggle {
       display: flex;
     }
   
@@ -1810,7 +1812,7 @@
   }
   
   @media screen and (max-width: 650px) {
-    .channerl-list__container-toggle {
+    .channel-list__container-toggle {
       right: -3%;
     }
   }
@@ -1820,7 +1822,7 @@
       width: 150px;
     }
   
-    .channerl-list__container-toggle {
+    .channel-list__container-toggle {
       right: -5%;
     }
   }
@@ -1830,4 +1832,21 @@
       display: none;
     }
   }
+
+.channel-list__list__items {
+  padding-top: 20px;
+}
+
+.channel-list__list__items Box stack Item:hover {
+  background-color: #0066ff;
+}
+
+.item {
+  cursor: pointer;
+}
+
+.item:hover {
+  background-color: #0049b5;
+}
+
   

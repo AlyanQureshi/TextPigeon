@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { StreamChat } from "stream-chat";
 import { Chat } from "stream-chat-react";
 import Cookies from "universal-cookie";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-import { ChannelListContainer, ChannelContainer, Auth } from "./components";
+import { ChannelListContainer, ChannelContainer, Auth, FriendsPage } from "./components";
 
 import 'stream-chat-react/dist/css/index.css';
 import "./App.css"
@@ -34,24 +35,32 @@ const App = () => {
         return <Auth />
 
     return (
-        <div className='app__wrapper'>
-        <Chat client={client} theme='team light'>
-            <ChannelListContainer
-                isCreating={isCreating}
-                setIsCreating={setIsCreating}
-                setCreateType={setCreateType}
-                setIsEditing={setIsEditing}
-            />
-            <ChannelContainer
-                isCreating={isCreating}
-                setIsCreating={setIsCreating}
-                isEditing={isEditing}
-                setIsEditing={setIsEditing}
-                createType={createType}
-            />
-        </Chat>
-        </div>
-    )
+        <Router>
+            <Routes>
+                <Route path="/" element={<Navigate to="/home" />} />
+                <Route path="/home" element={
+                    <div className='app__wrapper'>
+                        <Chat client={client} theme='team light'>
+                            <ChannelListContainer
+                                isCreating={isCreating}
+                                setIsCreating={setIsCreating}
+                                setCreateType={setCreateType}
+                                setIsEditing={setIsEditing}
+                            />
+                            <ChannelContainer
+                                isCreating={isCreating}
+                                setIsCreating={setIsCreating}
+                                isEditing={isEditing}
+                                setIsEditing={setIsEditing}
+                                createType={createType}
+                            />
+                        </Chat>
+                    </div>
+                } />
+                <Route path="/friends" element={<FriendsPage />} />
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;

@@ -5,6 +5,7 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import Cookies from 'universal-cookie';
+import TextField from '@mui/material/TextField';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#005fff",
@@ -21,6 +22,7 @@ const cookies = new Cookies();
 const FriendsHeader = () => (
     <div className="channel-list__header">
         <p className="channel-list__header__text">Friends Page</p>
+        
     </div>
 );
 
@@ -40,7 +42,17 @@ const FriendsPage = () => {
     const renderContent = () => {
         switch (activeTab) {
             case 'current':
-                return <div>Current Friends Content</div>;
+                return (
+                    <div>
+                        <p className='text-center fs-2 fw-bold'>
+                            Current Friends
+                        </p>
+                        <div className='friends_search button'>
+                            <TextField  halfWidth label="fullWidth" id='fullWidth' />
+                        </div>
+                        
+                    </div>
+                );
             case 'add':
                 return <div>Add Friends Content</div>;
             case 'requests':

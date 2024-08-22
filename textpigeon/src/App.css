@@ -439,6 +439,9 @@
   }
   
   .channel-list__header {
+    display: flex;
+    align-items: last baseline;
+    /* justify-content: center; */
     padding-left: 16px;
     height: 62px;
     border-bottom: 1px solid #00000033;
@@ -1849,4 +1852,15 @@
   background-color: #0049b5;
 }
 
-  
+.friends-page__content {
+  width: 100%;
+}
+
+.friends-page__content div p {
+  padding-bottom: 13px;
+  border-bottom: 1px solid #00000033;
+}
+
+.friends_search button {
+  margin-left: 20%;
+}

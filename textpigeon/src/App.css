@@ -374,6 +374,7 @@
     /* height: 800px; */
     height: 100%;
     box-shadow: inset 1px 0px 0px rgba(0, 0, 0, 0.1);
+    align-items: stretch;
   }
   
   .channel-list__sidebar {
@@ -404,7 +405,8 @@
     display: flex;
     flex-direction: column;
     background: var(--primary-color);
-    width: 240px;
+    width: 260px;
+    
   }
   
   .icon1__inner {
@@ -598,6 +600,7 @@
     height: 62px;
     box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.1);
     padding-right: 20px;
+    padding-bottom: 23px;
   }
   
   .create-channel__header p {
@@ -607,9 +610,11 @@
     line-height: 22px;
     color: #2c2c30;
     margin-left: 20px;
+    padding-top: 40px;
   }
   
   .create-channel__header svg {
+    /* padding-top: 10px; */
     cursor: pointer;
   }
   
@@ -1856,11 +1861,26 @@
   width: 100%;
 }
 
-.friends-page__content div p {
-  padding-bottom: 13px;
-  border-bottom: 1px solid #00000033;
+.friends-page__content div div  {
+  
+  padding-top: 1px;
 }
 
 .friends_search button {
   margin-left: 20%;
+}
+
+.input_with_button {
+  width: 90px;
+  height: 39px;
+}
+
+.table {
+  margin-top: 20px;
+  margin-left: 40px;
+  margin-right: 20px;
+}
+
+.input_near_button {
+  width: 20%;
 }

@@ -12,7 +12,7 @@ const pool = new Pool({
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT
-  });
+});
 
 const stream_app_id = process.env.STREAM_APP_ID;
 const stream_api_key = process.env.STREAM_API_KEY;

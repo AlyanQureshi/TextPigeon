@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Sidebar } from './';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -16,6 +16,9 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
+import { useChatContext } from 'stream-chat-react';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#005fff",
@@ -37,12 +40,68 @@ const FriendsHeader = () => (
 );
 
 const FriendsPage = () => {
+    const { client } = useChatContext();
     const [activeTab, setActiveTab] = useState('current');
     const [query, setQuery] = useState("");
     const [friendQuery, setFriendQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [requestMessage, setRequestMessage] = useState("");
     const [requestPending, setRequestPending] = useState(false);
+    const [open, setOpen] = React.useState(false);
+    const [friendRequests, setFriendRequests] = useState([]);
+
+    // do backend for getting friend requests
+    // show the users through map or some shit in table
+    // do backend for accept logic, 
+    // do backend for deny logic
+    // do backend for unfriend logic
+    // do backend for getting current friends and show it in the table of current friends by doing map or some shit
+    // change the user list to only friends list by using the current friends function in the user list component
+    // then make verification method
+    // then host
+    
+
+    useEffect(() => {
+        const getFriendRequests = async () => {
+            const URL = "http://localhost:5000/friends/getFriendRequests";
+            const username = cookies.get("username");
+    
+            try {
+                const { data: { names_arr } } = await axios.post(URL, { username });
+                if (names_arr.length !== 0) {
+                    // Create an array to hold user metadata
+                    const usersMetadata = [];
+
+                    for (const name of names_arr) {
+                        const response = await client.queryUsers({
+                            name: name
+                        });
+
+                        // Push the user metadata to the array if users are found
+                        if (response.users.length > 0) {
+                            usersMetadata.push(response.users[0]); // Assuming names_arr contains unique names
+                        }
+                    }
+                    
+                    setFriendRequests(usersMetadata);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        if (activeTab === 'add') {
+            getFriendRequests();
+        }
+    }, [activeTab]);
+
+    useEffect(() => {
+        console.log('Updated friendRequests:', friendRequests);
+    }, [friendRequests]);
+
+    const handleBackdropClose = () => {
+        setOpen(false);
+      };
 
     const handleQueryChange = (e) => {
         setQuery(e.target.value);
@@ -52,13 +111,20 @@ const FriendsPage = () => {
         setFriendQuery(e.target.value);
     }
 
-    const handleFriendRequest = async (e) => {
+    const handleFriendRequest = async () => {
         setLoading(true);
         setRequestPending(true);
 
         const URL = "http://localhost:5000/friends/friendRequest";
 
         const sender_username = cookies.get("username");
+
+        if (friendQuery === sender_username) {
+            setRequestMessage("You can't friend request yourself, silly!");
+            setRequestPending(false); 
+            setFriendQuery("");
+            return;
+        }
 
         try {
             const { data: { message }} = await axios.post(URL, {
@@ -72,6 +138,20 @@ const FriendsPage = () => {
             setRequestPending(false);
         }
         setFriendQuery("");
+    }
+
+    const handleAcceptClick = () => {
+        setOpen(true);
+
+        const URL = "http://localhost:5000/friends/acceptFriend";
+
+
+    } 
+
+    const handleDenyClick = () => {
+        setOpen(true);
+
+        const URL = "http://localhost:5000/friends/denyFriend";
     }
 
     const handleClose = () => {
@@ -102,8 +182,8 @@ const FriendsPage = () => {
                             <p>Enter a Username</p>
                             <input value={query} onChange={handleQueryChange} placeholder="Search for Friends" />
                             <p className='fw-bold '>Friends List</p>
-                        </div>
-                        <div style={{ maxHeight: '640px', overflowY: 'auto', overflowX: 'hidden'}}>
+                        </div> 
+                        <div style={{ maxHeight: '610px', overflowY: 'auto', overflowX: 'hidden'}}>
                             <table className='table table-borderless table-hover'>
                                 <thead>
                                     <tr>
@@ -147,6 +227,7 @@ const FriendsPage = () => {
                                 </tbody>
                             </table>
                         </div>
+                        
                     </div>
                 );
             case 'add':
@@ -173,68 +254,72 @@ const FriendsPage = () => {
                             </div>
                             <p className='fw-bold '>Incoming Friend Requests</p>
                         </div>
-                        <div style={{ maxHeight: '640px', overflowY: 'auto', overflowX: 'hidden'}}>
-                            <table className='table table-borderless table-hover'>
-                                <thead>
-                                    <tr>
-                                        <th scope="col"></th>
-                                        <th scope="col">Full Name</th>
-                                        <th scope="col">Username</th>
-                                        <th scope="col">Accept</th>
-                                        <th scope="col">Deny</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th scope="row">1</th>
-                                        <td>Mark</td>
-                                        <td>Otto</td>
-                                        <td>
-                                            <IconButton aria-label="delete" color='success'>
-                                                <CheckOutlinedIcon />
-                                            </IconButton>
-                                        </td>
-                                        <td>
-                                            <IconButton aria-label="delete" color='error'>
-                                                <CancelOutlinedIcon />
-                                            </IconButton>
-                                        </td>
-                                    </tr>
-                                    
+                        {friendRequests.length === 0 ? (
+                            <h5 style={{ margin: '20px' }}>You currently have no incoming friend requests.</h5>
+                        ) : (
+                            <div style={{ maxHeight: '610px', overflowY: 'auto', overflowX: 'hidden'}}>
+                                <table className='table table-borderless table-hover'>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col"></th>
+                                            <th scope="col">Full Name</th>
+                                            <th scope="col">Username</th>
+                                            <th scope="col">Accept</th>
+                                            <th scope="col">Deny</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">1</th>
+                                            <td>Mark</td>
+                                            <td>Otto</td>
+                                            <td>
+                                                <IconButton aria-label="delete" color='success' onClick={handleAcceptClick}>
+                                                    <CheckOutlinedIcon />
+                                                </IconButton>
+                                            </td>
+                                            <td>
+                                                <IconButton aria-label="delete" color='error' onClick={handleDenyClick}>
+                                                    <CancelOutlinedIcon />
+                                                </IconButton>
+                                            </td>
+                                        </tr>
+                                        
 
-                                    <tr>
-                                        <th scope="row">2</th>
-                                        <td>Jacob</td>
-                                        <td>Thornton</td>
-                                        <td>
-                                            <IconButton aria-label="delete" color='success'>
-                                                <CheckOutlinedIcon />
-                                            </IconButton>
-                                        </td>
-                                        <td>
-                                            <IconButton aria-label="delete" color='error'>
-                                                <CancelOutlinedIcon  />
-                                            </IconButton>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">3</th>
-                                        <td >Larry the Bird</td>
-                                        <td>hello</td>
-                                        <td>
-                                            <IconButton aria-label="delete" color='success'>
-                                                <CheckOutlinedIcon />
-                                            </IconButton>
-                                        </td>
-                                        <td>
-                                            <IconButton aria-label="delete" color='error'>
-                                                <CancelOutlinedIcon  />
-                                            </IconButton>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                                        <tr>
+                                            <th scope="row">2</th>
+                                            <td>Jacob</td>
+                                            <td>Thornton</td>
+                                            <td>
+                                                <IconButton aria-label="delete" color='success'>
+                                                    <CheckOutlinedIcon />
+                                                </IconButton>
+                                            </td>
+                                            <td>
+                                                <IconButton aria-label="delete" color='error'>
+                                                    <CancelOutlinedIcon  />
+                                                </IconButton>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">3</th>
+                                            <td >Larry the Bird</td>
+                                            <td>hello</td>
+                                            <td>
+                                                <IconButton aria-label="delete" color='success'>
+                                                    <CheckOutlinedIcon />
+                                                </IconButton>
+                                            </td>
+                                            <td>
+                                                <IconButton aria-label="delete" color='error'>
+                                                    <CancelOutlinedIcon  />
+                                                </IconButton>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 );
             default:
@@ -291,6 +376,13 @@ const FriendsPage = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={open}
+                onClick={handleBackdropClose}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
         </div>
       );
 }

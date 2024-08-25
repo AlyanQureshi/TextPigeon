@@ -36,11 +36,11 @@ const App = () => {
 
     return (
         <Router>
-            <Routes>
-                <Route path="/" element={<Navigate to="/home" />} />
-                <Route path="/home" element={
-                    <div className='app__wrapper'>
-                        <Chat client={client} theme='team light'>
+            <Chat client={client} theme='team light'>
+                <Routes>
+                    <Route path="/" element={<Navigate to="/home" />} />
+                    <Route path="/home" element={
+                        <div className='app__wrapper'>
                             <ChannelListContainer
                                 isCreating={isCreating}
                                 setIsCreating={setIsCreating}
@@ -54,11 +54,11 @@ const App = () => {
                                 setIsEditing={setIsEditing}
                                 createType={createType}
                             />
-                        </Chat>
-                    </div>
-                } />
-                <Route path="/friends" element={<FriendsPage />} />
-            </Routes>
+                        </div>
+                    } />
+                    <Route path="/friends" element={<FriendsPage />} />
+                </Routes>
+            </Chat>
         </Router>
     );
 }

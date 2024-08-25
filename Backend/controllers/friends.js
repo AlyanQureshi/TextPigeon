@@ -27,7 +27,7 @@ const friendRequest = async (req, res) => {
 
             // Checking whether sender has already friend requested them
             const friend_request_verification = await client.query('SELECT incoming_friend_ids FROM pigeons where id = $1', [receivers_id]);
-            if (friend_request_verification.rows.length > 0) {
+            if (friend_request_verification.rows.length > 0 && friend_request_verification.rows[0].incoming_friend_ids != null) {
                 let verification_string = friend_request_verification.rows[0].incoming_friend_ids;
                 verification_string = verification_string.slice(0, -1);
 
@@ -42,8 +42,9 @@ const friendRequest = async (req, res) => {
 
             // Checking whether sender is already friends
             const friend_verification = await client.query('SELECT friend_ids FROM pigeons where id = $1', [receivers_id]);
-            if (friend_verification.rows.length > 0) {
+            if (friend_verification.rows.length > 0 && friend_verification.rows[0].friend_ids != null) {
                 let verification_string = friend_verification.rows[0].friend_ids;
+
                 verification_string = verification_string.slice(0, -1);
 
                 // Convert the string to an array
@@ -73,5 +74,34 @@ const friendRequest = async (req, res) => {
     }
 }
 
+const getFriendRequests = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const { username } = req.body;
+        let usernames = [];
 
-module.exports = { friendRequest };
+        const friendRequest_ids = await client.query('SELECT incoming_friend_ids FROM pigeons WHERE username = $1', [username]);
+        if (friendRequest_ids.rows[0].incoming_friend_ids != null) {
+            let ids = friendRequest_ids.rows[0].incoming_friend_ids;
+            ids = ids.slice(0, -1);
+            let request_ids = ids.split(',');
+
+            // Using for...of to properly handle async operations
+            for (const element of request_ids) {
+                let db_username = await client.query('SELECT username FROM pigeons WHERE id = $1', [element]);
+                usernames.push(db_username.rows[0].username);
+            }
+
+            res.status(200).json({ names_arr: usernames });
+        } else {
+            res.status(200).json({ names_arr: usernames });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Internal Server error.' });
+    } finally {
+        client.release();
+    }
+}
+
+module.exports = { friendRequest, getFriendRequests };

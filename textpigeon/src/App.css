@@ -746,6 +746,7 @@
   
   .user-item__name {
     font-weight: 500;
+    margin-top: 12px;
   }
   
   .user-item__last-active {
@@ -789,6 +790,7 @@
     line-height: 22px;
     color: #2c2c30;
     margin-left: 20px;
+    margin-top: 23px;
   }
   
   .edit-channel__header svg {
@@ -871,6 +873,7 @@
   .team-channel-header__channel-wrapper {
     display: flex;
     align-items: center;
+    justify-content: center;
   }
   
   .team-channel-header__channel-wrapper svg {
@@ -878,11 +881,15 @@
   }
   
   .team-channel-header__name {
+    display: flex;
     font-family: Helvetica Neue, sans-serif;
     font-weight: bold;
     font-size: 18px;
     color: #2c2c30;
     margin-right: 8px;
+    align-items: center;
+    margin-top: 14px;
+    /* justify-content: center; */
   }
   
   .team-channel-header__name-wrapper {
@@ -948,6 +955,7 @@
     font-family: Helvetica Neue, sans-serif;
     font-size: 14px;
     color: #858688;
+    margin-top: 14px;
   }
   
   .team-channel-list {
@@ -970,6 +978,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 10px;
   }
   
   .team-channel-list__header svg {
@@ -982,7 +991,7 @@
     line-height: 16px;
     height: 16px;
     color: rgba(255, 255, 255, 0.66);
-    margin-bottom: 10px;
+    margin-bottom: 5px;
   }
   
   .channel-preview__wrapper {
@@ -1024,8 +1033,13 @@
     width: 100%;
     text-overflow: ellipsis;
     word-break: break-all;
+    margin-top: 12px;
   }
   
+  .channel-preview__item p {
+    margin-top: 12px;
+  }
+
   .channel-preview__item.multi {
     max-width: 220px;
   }

@@ -104,4 +104,123 @@ const getFriendRequests = async (req, res) => {
     }
 }
 
-module.exports = { friendRequest, getFriendRequests };
+const getFriends = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const { username } = req.body;
+        let usernames = [];
+
+        const friend_ids = await client.query('SELECT friend_ids FROM pigeons WHERE username = $1', [username]);
+        if (friend_ids.rows[0].friend_ids != null) {
+            let ids = friend_ids.rows[0].friend_ids;
+            ids = ids.slice(0, -1);
+            let friends_ids = ids.split(',');
+
+            // Using for...of to properly handle async operations
+            for (const element of friends_ids) {
+                let db_username = await client.query('SELECT username FROM pigeons WHERE id = $1', [element]);
+                usernames.push(db_username.rows[0].username);
+            }
+
+            res.status(200).json({ names_arr: usernames });
+        } else {
+            res.status(200).json({ names_arr: usernames });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Internal Server error.' });
+    } finally {
+        client.release();
+    }
+}
+
+const acceptFriend = async(req, res) => {
+    const client = await pool.connect();
+    try {
+        const { accepted_username, client_username } = req.body;
+
+        // id of the accepted friend
+        const accepting_id = await client.query('SELECT id FROM pigeons WHERE username = $1', [accepted_username]);
+        let id = accepting_id.rows[0].id;
+
+        // all current friend requests
+        const client_friend_requests = await client.query('SELECT incoming_friend_ids FROM pigeons WHERE username = $1', [client_username]);
+        let request_ids_string = client_friend_requests.rows[0].incoming_friend_ids;
+        request_ids_string = request_ids_string.slice(0, -1);
+        let request_ids = request_ids_string.split(','); 
+
+        // Filter out the id from the array
+        request_ids = request_ids.filter(request_id => request_id !== id.toString());
+
+        // checking if no more friend requests
+        if (request_ids.length === 0) {
+            await client.query(
+                'UPDATE pigeons SET incoming_friend_ids = $1 WHERE username = $2',
+                [null, client_username]
+            );
+        } else {
+            request_ids_string = request_ids.join(',') + ',';
+            await client.query(
+                'UPDATE pigeons SET incoming_friend_ids = $1 WHERE username = $2',
+                [request_ids_string, client_username]
+            );
+        }
+
+        // adding accepted friend id to friend_ids column
+        let friend_id_string = `${id},`;
+        await client.query(
+            'UPDATE pigeons SET friend_ids = COALESCE(friend_ids, \'\') || $1 WHERE username = $2',
+            [friend_id_string, client_username]
+        );
+
+        res.status(200).json({ message: "Friend request accepted and list updated." });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Internal Server error.' });
+    } finally {
+        client.release();
+    }
+}
+
+const denyFriend = async(req, res) => {
+    const client = await pool.connect();
+    try {
+        const { denied_username, client_username } = req.body;
+
+        // id of the accepted friend
+        const denying_id = await client.query('SELECT id FROM pigeons WHERE username = $1', [denied_username]);
+        let id = denying_id.rows[0].id;
+
+        // all current friend requests
+        const client_friend_requests = await client.query('SELECT incoming_friend_ids FROM pigeons WHERE username = $1', [client_username]);
+        let request_ids_string = client_friend_requests.rows[0].incoming_friend_ids;
+        request_ids_string = request_ids_string.slice(0, -1);
+        let request_ids = request_ids_string.split(','); 
+
+        // Filter out the id from the array
+        request_ids = request_ids.filter(request_id => request_id !== id.toString());
+
+        // checking if no more friend requests
+        if (request_ids.length === 0) {
+            await client.query(
+                'UPDATE pigeons SET incoming_friend_ids = $1 WHERE username = $2',
+                [null, client_username]
+            );
+        } else {
+            request_ids_string = request_ids.join(',') + ',';
+            await client.query(
+                'UPDATE pigeons SET incoming_friend_ids = $1 WHERE username = $2',
+                [request_ids_string, client_username]
+            );
+        }
+
+        res.status(200).json({ message: "Friend request denied and list updated." });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Internal Server error.' });
+    } finally {
+        client.release();
+    }
+}
+
+module.exports = { friendRequest, getFriendRequests, getFriends, acceptFriend, denyFriend };

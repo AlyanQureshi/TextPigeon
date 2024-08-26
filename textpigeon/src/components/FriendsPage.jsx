@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sidebar } from './';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -18,7 +18,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useChatContext } from 'stream-chat-react';
+import { useChatContext, Avatar } from 'stream-chat-react';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#005fff",
@@ -47,25 +47,26 @@ const FriendsPage = () => {
     const [loading, setLoading] = useState(false);
     const [requestMessage, setRequestMessage] = useState("");
     const [requestPending, setRequestPending] = useState(false);
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = useState(false);
     const [friendRequests, setFriendRequests] = useState([]);
+    const [currFriends, setCurrFriends] = useState([]);
 
-    // do backend for getting friend requests
-    // show the users through map or some shit in table
-    // do backend for accept logic, 
-    // do backend for deny logic
+    // do backend for getting friend requests // done
+    // show the users through map or some shit in table // done
+    // do backend for getting current friends and show it in the table of current friends by doing map or some shit // done
+    // do backend for accept logic, // done
+    // do backend for deny logic // done
     // do backend for unfriend logic
-    // do backend for getting current friends and show it in the table of current friends by doing map or some shit
+    // functionality for search in current friends
     // change the user list to only friends list by using the current friends function in the user list component
     // then make verification method
     // then host
     
-
+    // Use Effect for getting Friend Requests
     useEffect(() => {
         const getFriendRequests = async () => {
             const URL = "http://localhost:5000/friends/getFriendRequests";
             const username = cookies.get("username");
-    
             try {
                 const { data: { names_arr } } = await axios.post(URL, { username });
                 if (names_arr.length !== 0) {
@@ -82,7 +83,6 @@ const FriendsPage = () => {
                             usersMetadata.push(response.users[0]); // Assuming names_arr contains unique names
                         }
                     }
-                    
                     setFriendRequests(usersMetadata);
                 }
             } catch (error) {
@@ -91,13 +91,45 @@ const FriendsPage = () => {
         }
 
         if (activeTab === 'add') {
+            setOpen(true);
             getFriendRequests();
+            setOpen(false);
         }
     }, [activeTab]);
 
+    // Use Effect for getting current friends
     useEffect(() => {
-        console.log('Updated friendRequests:', friendRequests);
-    }, [friendRequests]);
+        const getFriends = async () => {
+            const URL = "http://localhost:5000/friends/getFriends";
+            const username = cookies.get("username");
+            try {
+                const { data: { names_arr } } = await axios.post(URL, { username });
+                if (names_arr.length !== 0) {
+                    // Create an array to hold user metadata
+                    const usersMetadata = [];
+
+                    for (const name of names_arr) {
+                        const response = await client.queryUsers({
+                            name: name
+                        });
+
+                        // Push the user metadata to the array if users are found
+                        if (response.users.length > 0) {
+                            usersMetadata.push(response.users[0]); // Assuming names_arr contains unique names
+                        }
+                    }
+                    setCurrFriends(usersMetadata);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        if (activeTab === 'current') {
+            setOpen(true);
+            getFriends();
+            setOpen(false);
+        }
+    }, [activeTab]);
 
     const handleBackdropClose = () => {
         setOpen(false);
@@ -129,7 +161,7 @@ const FriendsPage = () => {
         try {
             const { data: { message }} = await axios.post(URL, {
                 receiver_username: friendQuery, sender_username
-            })
+            });
     
             setRequestMessage(message);
             setRequestPending(false); 
@@ -140,18 +172,41 @@ const FriendsPage = () => {
         setFriendQuery("");
     }
 
-    const handleAcceptClick = () => {
+    const handleAcceptClick = async (username) => {
         setOpen(true);
-
+        const client_username = cookies.get("username");
         const URL = "http://localhost:5000/friends/acceptFriend";
+        try {
+            const response = await axios.post(URL, {
+                accepted_username: username, client_username
+            });
 
+            setFriendRequests(friendRequests.filter(friendRequest => friendRequest.name !== username));
+        } catch (error) {
+            console.log(error);
+        }
+        setOpen(false);
+    }
 
-    } 
-
-    const handleDenyClick = () => {
+    const handleDenyClick = async (username) => {
         setOpen(true);
-
+        const client_username = cookies.get("username");
         const URL = "http://localhost:5000/friends/denyFriend";
+
+        try {
+            const response = await axios.post(URL, {
+                denied_username: username, client_username
+            });
+
+            setFriendRequests(friendRequests.filter(friendRequest => friendRequest.name !== username));
+        } catch (error) {
+            console.log(error);
+        }
+        setOpen(false);
+    }
+
+    const handleUnfriendClick = (username) => {
+
     }
 
     const handleClose = () => {
@@ -182,52 +237,43 @@ const FriendsPage = () => {
                             <p>Enter a Username</p>
                             <input value={query} onChange={handleQueryChange} placeholder="Search for Friends" />
                             <p className='fw-bold '>Friends List</p>
-                        </div> 
-                        <div style={{ maxHeight: '610px', overflowY: 'auto', overflowX: 'hidden'}}>
-                            <table className='table table-borderless table-hover'>
-                                <thead>
-                                    <tr>
-                                        <th scope="col"></th>
-                                        <th scope="col">Full Name</th>
-                                        <th scope="col">Username</th>
-                                        <th scope="col">Unfriend</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th scope="row">1</th>
-                                        <td>Mark</td>
-                                        <td>Otto</td>
-                                        <td>
-                                            <IconButton aria-label="delete" color='error'>
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">2</th>
-                                        <td>Jacob</td>
-                                        <td>Thornton</td>
-                                        <td>
-                                            <IconButton aria-label="delete" color='error'>
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">3</th>
-                                        <td >Larry the Bird</td>
-                                        <td>hello</td>
-                                        <td>
-                                            <IconButton aria-label="delete" color='error'>
-                                                <DeleteIcon  />
-                                            </IconButton>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
                         </div>
-                        
+                        {currFriends.length === 0 ? (
+                            <h5 style={{ margin: '20px' }}>You currently have no friends. Go to the Add Friends page and send a friend request!</h5>
+                        ) : (
+                            <div style={{ maxHeight: '610px', overflowY: 'auto', overflowX: 'hidden'}}>
+                                <table className='table table-borderless table-hover'>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Profile Picture</th>
+                                            <th scope="col">Full Name</th>
+                                            <th scope="col">Username</th>
+                                            <th scope="col">Unfriend</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {currFriends.map((friend, index) => {
+                                            return (
+                                                <tr key={index}>
+                                                    <th scope="row">
+                                                        <Avatar image={friend.image} size={30} name={friend.name} shape='rounded'/>
+                                                    </th>
+                                                    <td>{(friend.fullName).charAt(0).toUpperCase() + (friend.fullName).slice(1)}</td>
+                                                    <td>{friend.name}</td>
+                                                    <td>
+                                                        <IconButton aria-label="delete" color='error' 
+                                                            onClick={() => handleUnfriendClick(friend.name)}
+                                                        >
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )} 
                     </div>
                 );
             case 'add':
@@ -261,7 +307,7 @@ const FriendsPage = () => {
                                 <table className='table table-borderless table-hover'>
                                     <thead>
                                         <tr>
-                                            <th scope="col"></th>
+                                            <th scope="col">Profile Picture</th>
                                             <th scope="col">Full Name</th>
                                             <th scope="col">Username</th>
                                             <th scope="col">Accept</th>
@@ -269,53 +315,31 @@ const FriendsPage = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <th scope="row">1</th>
-                                            <td>Mark</td>
-                                            <td>Otto</td>
-                                            <td>
-                                                <IconButton aria-label="delete" color='success' onClick={handleAcceptClick}>
-                                                    <CheckOutlinedIcon />
-                                                </IconButton>
-                                            </td>
-                                            <td>
-                                                <IconButton aria-label="delete" color='error' onClick={handleDenyClick}>
-                                                    <CancelOutlinedIcon />
-                                                </IconButton>
-                                            </td>
-                                        </tr>
-                                        
-
-                                        <tr>
-                                            <th scope="row">2</th>
-                                            <td>Jacob</td>
-                                            <td>Thornton</td>
-                                            <td>
-                                                <IconButton aria-label="delete" color='success'>
-                                                    <CheckOutlinedIcon />
-                                                </IconButton>
-                                            </td>
-                                            <td>
-                                                <IconButton aria-label="delete" color='error'>
-                                                    <CancelOutlinedIcon  />
-                                                </IconButton>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">3</th>
-                                            <td >Larry the Bird</td>
-                                            <td>hello</td>
-                                            <td>
-                                                <IconButton aria-label="delete" color='success'>
-                                                    <CheckOutlinedIcon />
-                                                </IconButton>
-                                            </td>
-                                            <td>
-                                                <IconButton aria-label="delete" color='error'>
-                                                    <CancelOutlinedIcon  />
-                                                </IconButton>
-                                            </td>
-                                        </tr>
+                                        {friendRequests.map((friendRequest, index) => {
+                                            return (
+                                                <tr key={index}>
+                                                    <th scope='row'>
+                                                        <Avatar image={friendRequest.image} size={30} name={friendRequest.name} shape='rounded'/>
+                                                    </th>
+                                                    <td>{(friendRequest.fullName).charAt(0).toUpperCase() + (friendRequest.fullName).slice(1)}</td>
+                                                    <td>{friendRequest.name}</td>
+                                                    <td>
+                                                        <IconButton aria-label="delete" color='success' 
+                                                            onClick={() => handleAcceptClick(friendRequest.name)}
+                                                        >
+                                                            <CheckOutlinedIcon />
+                                                        </IconButton>
+                                                    </td>
+                                                    <td>
+                                                        <IconButton aria-label="delete" color='error' 
+                                                            onClick={() => handleDenyClick(friendRequest.name)}
+                                                            >
+                                                            <CancelOutlinedIcon />
+                                                        </IconButton>
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

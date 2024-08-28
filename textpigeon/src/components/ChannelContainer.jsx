@@ -3,7 +3,7 @@ import { Channel, useChatContext } from 'stream-chat-react';
 
 import { ChannelInner, CreateChannel, EditChannel } from './';
 
-
+import textPigeonImage from '../assets/textPigeon.png';
 
 const ChannelContainer = ({ isCreating, setIsCreating, isEditing, setIsEditing, createType }) => {
     const { client } = useChatContext();
@@ -72,13 +72,18 @@ const ChannelContainer = ({ isCreating, setIsCreating, isEditing, setIsEditing, 
 	return (
 	    <div className=" channel__container">
             {intro && (
-                <>
-                    <h4 className='display-3' style={{ margin: '20px' }}>Welcome To Text Pigeon!</h4>
-                    <p className='fs-4' style={{ margin: '20px' }}>
+                <div style={{ textAlign: 'center', marginTop: '80px' }}>
+                    <h4 className='display-3' style={{ marginTop: '20px' }}>Welcome To Text Pigeon!</h4>
+                    <p className='fs-4' style={{ marginTop: '20px' }}>
                         Currently, you have no chats so click on the Friend's Icon on the left and 
                         send a friend request!
                     </p>
-                </>
+                    <p className='fs-4' style={{ marginTop: '20px' }}>
+                        After you have a friend, click on the add icon (+) besides Channels or Direct Messages and begin texting!
+                    </p>
+                    <img src={textPigeonImage} alt="Text Pigeon Logo" 
+                        style={{ width: '450px', height: "450px" , marginTop: '20px' }} />
+                </div>
             )}  
 			<Channel
                 EmptyStateIndicator={EmptyState}

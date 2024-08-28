@@ -1,8 +1,8 @@
 import React from 'react';
 import { Avatar, useChatContext } from 'stream-chat-react';
 
-const TeamChannelPreview = ({ setActiveChannel, channel, type, setToggleContainer, setIsEditing, setIsCreating }) => {
-    const { channel: activeChannel, client } = useChatContext();
+const TeamChannelPreview = ({ channel, type, setToggleContainer, setIsEditing, setIsCreating }) => {
+    const { client, setActiveChannel, channel: activeChannel } = useChatContext();
 
     const ChannelPreview = () => (
         <p className="channel-preview__item">
@@ -46,4 +46,4 @@ const TeamChannelPreview = ({ setActiveChannel, channel, type, setToggleContaine
     );
 }
 
-export default TeamChannelPreview;
+export default TeamChannelPreview;  

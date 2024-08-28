@@ -2,6 +2,7 @@ import { React, useState } from 'react';
 import Cookies from 'universal-cookie';
 import axios from 'axios';
 import validator from "validator";
+import Typography from '@mui/material/Typography';
 
 const cookies = new Cookies();
 
@@ -88,6 +89,11 @@ const Auth = () => {
     return (
         <div className="auth__form-container">
             <div className="auth__form-container_fields">
+                <Typography variant="h2" gutterBottom className='text-center fw-lighter' 
+                    sx={{ color: "white", marginBottom: "40px" }}
+                >
+                    Text Pigeon
+                </Typography>
                 <div className="auth__form-container_fields-content">
                     <p>{isSignup ? 'Sign Up' : 'Sign In'}</p>
                     <form onSubmit={handleSubmit}>

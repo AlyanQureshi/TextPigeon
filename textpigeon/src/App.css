@@ -579,6 +579,7 @@
   }
   
   .channel-search__result-text {
+    padding-top: 15px;
     width: 100%;
     font-family: Helvetica Neue, sans-serif;
     font-weight: 500;
@@ -959,6 +960,7 @@
   }
   
   .team-channel-list {
+    min-height: 380px;
     max-height: 380px;
     overflow-y: auto; 
     overflow-x: hidden;

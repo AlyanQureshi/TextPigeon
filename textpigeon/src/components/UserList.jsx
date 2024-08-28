@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Avatar, useChatContext } from 'stream-chat-react';
+import Cookies from 'universal-cookie';
+import axios from 'axios';
 
 import { InviteIcon } from '../assets';
+
+const cookies = new Cookies();
 
 const ListContainer = ({ children }) => {
     return (
@@ -63,19 +67,31 @@ const UserList = ({ setSelectedUsers, createType }) => {
                 return;
     
             setLoading(true);
-    
+            const URL = "http://localhost:5000/friends/getFriends";
+            const username = cookies.get("username");
             try {
-                const response = await client.queryUsers(
-                    { id: { $ne: client.userID } },
-                    { id: 1 },
-                    { limit: 8 } 
-                );
+                const { data: { names_arr } } = await axios.post(URL, { username });
 
-                if(response.users.length) {
-                    setUsers(response.users);
-                } else {
+                if (names_arr.length === 0) {
                     setListEmpty(true);
+                    return;
                 }
+
+                // Create an array to hold user metadata
+                const usersMetadata = [];
+
+                for (const name of names_arr) {
+                    const response = await client.queryUsers({
+                        name: name
+                    });
+
+                    // Push the user metadata to the array if users are found
+                    if (response.users.length > 0) {
+                        usersMetadata.push(response.users[0]); // Assuming names_arr contains unique names
+                    }
+                }   
+
+                setUsers(usersMetadata);
             } catch (error) {
                 setError(true);
             }
@@ -90,7 +106,7 @@ const UserList = ({ setSelectedUsers, createType }) => {
         return (
             <ListContainer>
                 <div className="user-list__message">
-                    There was an error loading users. Please refresh and try again.
+                    There was an error loading your friends. Please refresh and try again!
                 </div>
             </ListContainer>
         )
@@ -100,7 +116,7 @@ const UserList = ({ setSelectedUsers, createType }) => {
         return (
             <ListContainer>
                 <div className="user-list__message">
-                    No users found.
+                    You currently have no friends! Go to the Add Friends page and send a friend request.
                 </div>
             </ListContainer>
         )
@@ -109,7 +125,7 @@ const UserList = ({ setSelectedUsers, createType }) => {
     return (
         <ListContainer>
             {loading ? <div className="user-list__message">
-                Loading users...
+                Loading friends...
             </div> : (
                 users?.map((user, i) => (
                     <UserItem 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useChatContext } from 'stream-chat-react';
+import axios from 'axios';
 
 import { UserList } from './';
 import { CloseCreateChannel } from '../assets';
@@ -7,8 +8,6 @@ import { CloseCreateChannel } from '../assets';
 const ChannelNameInput = ({ channelName = "", setChannelName }) => {
     
     const handleChange = (e) => {
-        e.preventDefault();
-
         setChannelName(e.target.value);
     }
 
@@ -16,18 +15,52 @@ const ChannelNameInput = ({ channelName = "", setChannelName }) => {
         <div className="channel-name-input__wrapper">
             <p>Name</p>
             <input value={channelName} onChange={handleChange} placeholder="Channel Name" />
-            <p>Add Members</p>
+            <p>Add Friends to Channel</p>
         </div>
     );
 }
 
 const EditChannel = ({ setIsEditing }) => {
-    const { channel } = useChatContext();
+    const { channel, client } = useChatContext();
     const [channelName, setChannelName] = useState(channel?.data?.name);
     const [selectedUsers, setSelectedUsers] = useState([])
+    
+    const grantAdmin = async (userId) => {
+        const URL = "http://localhost:5000/admin/grant";
+
+        try {
+            const response = await axios.post(URL, {
+                userId
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to grant admin permissions');
+            }
+        } catch (error) {
+            console.log('Error granting admin permissions:', error);
+        }
+    };
+
+    const revokeAdmin = async (userId) => {
+        const URL = "http://localhost:5000/admin/revoke";
+
+        try {
+            const response = await axios.post(URL, {
+                userId
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to revoke admin permissions');
+            }
+        } catch (error) {
+            console.log('Error revoking admin permissions:', error);
+        }
+    };
 
     const updateChannel = async (event) => {
         event.preventDefault();
+        
+        grantAdmin(client.userID);
 
         const nameChanged = channelName !== (channel.data.name || channel.data.id);
 
@@ -42,6 +75,8 @@ const EditChannel = ({ setIsEditing }) => {
         setChannelName(null);
         setIsEditing(false);
         setSelectedUsers([]);
+
+        revokeAdmin(client.userID);
     }
 
     return (

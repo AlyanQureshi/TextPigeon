@@ -166,11 +166,22 @@ const acceptFriend = async(req, res) => {
             );
         }
 
-        // adding accepted friend id to friend_ids column
+        // adding accepted friend id to client friend_ids column
         let friend_id_string = `${id},`;
         await client.query(
             'UPDATE pigeons SET friend_ids = COALESCE(friend_ids, \'\') || $1 WHERE username = $2',
             [friend_id_string, client_username]
+        );
+
+        // id of the client 
+        const personal_id = await client.query('SELECT id FROM pigeons WHERE username = $1', [client_username]);
+        let client_id = personal_id.rows[0].id;
+
+        // putting client id into the accepted friend's friend_ids
+        friend_id_string = `${client_id},`;
+        await client.query(
+            'UPDATE pigeons SET friend_ids = COALESCE(friend_ids, \'\') || $1 WHERE username = $2',
+            [friend_id_string, accepted_username]
         );
 
         res.status(200).json({ message: "Friend request accepted and list updated." });
@@ -223,4 +234,72 @@ const denyFriend = async(req, res) => {
     }
 }
 
-module.exports = { friendRequest, getFriendRequests, getFriends, acceptFriend, denyFriend };
+const unfriend = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const { unfriend_username, client_username } = req.body;
+
+        // id of the unfriend
+        const unfriend_id = await client.query('SELECT id FROM pigeons WHERE username = $1', [unfriend_username]);
+        let id = unfriend_id.rows[0].id;
+
+        // all current friends
+        const client_friends = await client.query('SELECT friend_ids FROM pigeons WHERE username = $1', [client_username]);
+        let friend_ids_string = client_friends.rows[0].friend_ids;
+        friend_ids_string = friend_ids_string.slice(0, -1);
+        let friend_ids = friend_ids_string.split(',');
+
+        // Filter out the id from the friends array
+        friend_ids = friend_ids.filter(friend_id => friend_id !== id.toString());
+
+        // checking if no more friends for the client
+        if (friend_ids.length === 0) {
+            await client.query(
+                'UPDATE pigeons SET friend_ids = $1 WHERE username = $2',
+                [null, client_username]
+            );
+        } else {
+            friend_ids_string = friend_ids.join(',') + ',';
+            await client.query(
+                'UPDATE pigeons SET friend_ids = $1 WHERE username = $2',
+                [friend_ids_string, client_username]
+            );
+        }
+
+        // id of the client 
+        const clients_id = await client.query('SELECT id FROM pigeons WHERE username = $1', [client_username]);
+        let client_id = clients_id.rows[0].id;
+
+        // all current friends of the unfriend username
+        const unfriend_friends = await client.query('SELECT friend_ids FROM pigeons WHERE username = $1', [unfriend_username]);
+        let unfriend_ids_string = unfriend_friends.rows[0].friend_ids;
+        unfriend_ids_string = unfriend_ids_string.slice(0, -1);
+        let unfriend_ids = unfriend_ids_string.split(',');
+
+        // Filter out the id from the unfriended friends array
+        unfriend_ids = unfriend_ids.filter(unfriend_id => unfriend_id !== client_id.toString());
+
+        // checking if no more friends for the unfriended username
+        if (unfriend_ids.length === 0) {
+            await client.query(
+                'UPDATE pigeons SET friend_ids = $1 WHERE username = $2',
+                [null, unfriend_username]
+            );
+        } else {
+            unfriend_ids_string = unfriend_ids.join(',') + ',';
+            await client.query(
+                'UPDATE pigeons SET friend_ids = $1 WHERE username = $2',
+                [unfriend_ids_string, unfriend_username]
+            );
+        }
+
+        res.status(200).json({ message: "Friend unfriended and list updated." });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Internal Server error.' });
+    } finally {
+        client.release();
+    }
+}
+
+module.exports = { friendRequest, getFriendRequests, getFriends, acceptFriend, denyFriend, unfriend };

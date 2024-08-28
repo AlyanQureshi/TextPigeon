@@ -35,7 +35,6 @@ const cookies = new Cookies();
 const FriendsHeader = () => (
     <div className="channel-list__header">
         <p className="channel-list__header__text">Friends Page</p>
-        
     </div>
 );
 
@@ -50,15 +49,18 @@ const FriendsPage = () => {
     const [open, setOpen] = useState(false);
     const [friendRequests, setFriendRequests] = useState([]);
     const [currFriends, setCurrFriends] = useState([]);
+    const [unfriendConfirmation, setConfirmation] = useState(false);
+    const [unfriendedUsername, setUnfriendedUsername] = useState("");
+    const [filteredFriends, setFilteredFriends] = useState([]);
 
     // do backend for getting friend requests // done
     // show the users through map or some shit in table // done
     // do backend for getting current friends and show it in the table of current friends by doing map or some shit // done
     // do backend for accept logic, // done
     // do backend for deny logic // done
-    // do backend for unfriend logic
-    // functionality for search in current friends
-    // change the user list to only friends list by using the current friends function in the user list component
+    // do backend for unfriend logic // done
+    // functionality for search in current friends // done
+    // change the user list to only friends list by using the current friends function in the user list component // done
     // then make verification method
     // then host
     
@@ -119,6 +121,7 @@ const FriendsPage = () => {
                         }
                     }
                     setCurrFriends(usersMetadata);
+                    setFilteredFriends(usersMetadata);
                 }
             } catch (error) {
                 console.log(error);
@@ -133,11 +136,25 @@ const FriendsPage = () => {
 
     const handleBackdropClose = () => {
         setOpen(false);
-      };
+    };
 
     const handleQueryChange = (e) => {
-        setQuery(e.target.value);
-    }
+        const newQuery = e.target.value;
+        setQuery(newQuery);
+    
+        if (newQuery.trim() === "") {
+            // If the query is empty, show all friends
+            setFilteredFriends(currFriends);
+        } else {
+            // Filter friends based on the query
+            const filtered = currFriends.filter(friend => 
+                friend.fullName.toLowerCase().includes(newQuery.toLowerCase()) ||
+                friend.name.toLowerCase().includes(newQuery.toLowerCase())
+            );
+    
+            setFilteredFriends(filtered);
+        }
+    };
 
     const handleFriendQueryChange = (e) => {
         setFriendQuery(e.target.value);
@@ -205,8 +222,23 @@ const FriendsPage = () => {
         setOpen(false);
     }
 
-    const handleUnfriendClick = (username) => {
+    const handleUnfriendClick = async (username) => {
+        setConfirmation(false);
+        setOpen(true);
+        const client_username = cookies.get("username");
+        const URL = "http://localhost:5000/friends/unfriend";
 
+        try {
+            const response = await axios.post(URL, {
+                unfriend_username: username, client_username
+            });
+
+            setCurrFriends(currFriends.filter(currFriend => currFriend.name !== username));
+            setFilteredFriends(currFriends);
+        } catch (error) {
+            console.log(error);
+        }
+        setOpen(false);
     }
 
     const handleClose = () => {
@@ -225,6 +257,16 @@ const FriendsPage = () => {
         window.location.reload();
     }
 
+    const handleConfirmationOpen = (username) => {
+        setUnfriendedUsername(username);
+        setConfirmation(true);
+    }
+
+    const handleConfirmationClose = () => {
+        setConfirmation(false);
+        setUnfriendedUsername("");
+    }
+
     const renderContent = () => {
         switch (activeTab) {
             case 'current':
@@ -235,11 +277,22 @@ const FriendsPage = () => {
                         </div>
                         <div className="channel-name-input__wrapper">
                             <p>Enter a Username</p>
-                            <input value={query} onChange={handleQueryChange} placeholder="Search for Friends" />
+                            <input 
+                                value={query} 
+                                onChange={handleQueryChange} 
+                                placeholder="Search for Friends" 
+                            />
                             <p className='fw-bold '>Friends List</p>
                         </div>
+                        
                         {currFriends.length === 0 ? (
-                            <h5 style={{ margin: '20px' }}>You currently have no friends. Go to the Add Friends page and send a friend request!</h5>
+                            <h5 style={{ margin: '20px' }}>
+                                You currently have no friends. Go to the Add Friends page and send a friend request!
+                            </h5>
+                        ) : filteredFriends.length === 0 ? (
+                            <h5 style={{ margin: '20px' }}>
+                                No friends match your search.
+                            </h5>
                         ) : (
                             <div style={{ maxHeight: '610px', overflowY: 'auto', overflowX: 'hidden'}}>
                                 <table className='table table-borderless table-hover'>
@@ -252,28 +305,26 @@ const FriendsPage = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {currFriends.map((friend, index) => {
-                                            return (
-                                                <tr key={index}>
-                                                    <th scope="row">
-                                                        <Avatar image={friend.image} size={30} name={friend.name} shape='rounded'/>
-                                                    </th>
-                                                    <td>{(friend.fullName).charAt(0).toUpperCase() + (friend.fullName).slice(1)}</td>
-                                                    <td>{friend.name}</td>
-                                                    <td>
-                                                        <IconButton aria-label="delete" color='error' 
-                                                            onClick={() => handleUnfriendClick(friend.name)}
-                                                        >
-                                                            <DeleteIcon />
-                                                        </IconButton>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
+                                        {filteredFriends.map((friend, index) => (
+                                            <tr key={index}>
+                                                <th scope="row">
+                                                    <Avatar image={friend.image} size={30} name={friend.name} shape='rounded'/>
+                                                </th>
+                                                <td>{(friend.fullName).charAt(0).toUpperCase() + (friend.fullName).slice(1)}</td>
+                                                <td>{friend.name}</td>
+                                                <td>
+                                                    <IconButton aria-label="delete" color='error' 
+                                                        onClick={() => handleConfirmationOpen(friend.name)}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </td>
+                                            </tr>
+                                        ))}
                                     </tbody>
                                 </table>
                             </div>
-                        )} 
+                        )}
                     </div>
                 );
             case 'add':
@@ -301,7 +352,9 @@ const FriendsPage = () => {
                             <p className='fw-bold '>Incoming Friend Requests</p>
                         </div>
                         {friendRequests.length === 0 ? (
-                            <h5 style={{ margin: '20px' }}>You currently have no incoming friend requests.</h5>
+                            <h5 style={{ margin: '20px' }}>
+                                You currently have no incoming friend requests. Alternatively, send a friend request by entering a username above.
+                            </h5>
                         ) : (
                             <div style={{ maxHeight: '610px', overflowY: 'auto', overflowX: 'hidden'}}>
                                 <table className='table table-borderless table-hover'>
@@ -407,6 +460,28 @@ const FriendsPage = () => {
             >
                 <CircularProgress color="inherit" />
             </Backdrop>
+            {/* below is confirmation for unfriending a username */}
+            <Dialog
+                open={unfriendConfirmation}
+                onClose={handleConfirmationClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Unfriend?"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Are you sure you want to unfriend <span style={{ fontWeight: 'bold' }}>"{unfriendedUsername}"</span>?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleConfirmationClose}>No</Button>
+                    <Button onClick={() => handleUnfriendClick(unfriendedUsername)}>
+                        Yes
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
       );
 }

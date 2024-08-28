@@ -51,7 +51,7 @@ const Sidebar = ({ logout }) => {
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                        Are you sure you want to leave Text Pigeon?
+                        Are you sure you want to logout from Text Pigeon?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

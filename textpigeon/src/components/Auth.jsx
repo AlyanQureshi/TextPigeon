@@ -7,12 +7,13 @@ import Typography from '@mui/material/Typography';
 const cookies = new Cookies();
 
 const initialState = {
-    fullName: '',
-    email: '',
-    username: '',
+    form_fullName: '',
+    form_email: '',
+    form_username: '',
     username_email: '',
-    password: '',
-    confirmPassword: '',
+    form_password: '',
+    form_confirmPassword: '',
+    ver_code: ''
 }
 
 const Auth = () => {
@@ -20,6 +21,13 @@ const Auth = () => {
     const [isSignup, setIsSignup] = useState(true);
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [verification, setVerification] = useState(false);
+    const [emailAddress, setEmailAddress] = useState("");
+    const [code, setCode] = useState("");
+    const [username, setUsername] = useState("");
+    const [acc_fullName, setFullName] = useState("");
+    const [password, setPassword] = useState("");
+    
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -35,46 +43,77 @@ const Auth = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const { username, password, confirmPassword, email, username_email } = form;
+        const { form_username, form_password, form_confirmPassword, form_email, username_email, form_fullName } = form;
 
         const URL = "http://localhost:5000/auth";
-    
+
         if (isSignup) {
-            if (password !== confirmPassword) {
+            if (!verification && (form_password !== form_confirmPassword)) {
                 setError(true);
                 setErrorMessage("Signup Error: Passwords do not match.");
-            } else if (!validator.isEmail(email)) {
+            } else if (!verification && (!validator.isEmail(form_email))) {
                 setError(true);
                 setErrorMessage("Signup Error: Email is not in a valid format.");
             } else {
-                try {
-                    const { data: { token, userId, hashedPassword, fullName } } = await axios.post(`${URL}/signup`, {
-                        username, fullName: form.fullName, password, email
-                    })
-    
-                    cookies.set('token', token);
-                    cookies.set('username', form.username);
-                    cookies.set('fullName', fullName);
-                    cookies.set('userId', userId);
-                    cookies.set('hashedPassword', hashedPassword);
-    
-                    window.location.reload();
-                } catch (error) {
-                    setError(true);
-                    setErrorMessage(`Signup Error: ${error.response?.data?.message}`);
+                if (!verification) {
+                    const { data: { verification_code } } = await axios.post(`${URL}/verification`, {
+                        email: form_email
+                    });
+
+                    // Holding important form info for later
+                    setUsername(form_username);
+                    setFullName(form_fullName);
+                    setPassword(form_password);
+                    setEmailAddress(form_email);
+
+                    // Getting ready for verification step
+                    setCode(verification_code);
+                    setError(false);
+                    setErrorMessage("");
+                    setVerification(true);
+                } else {
+                    const { ver_code } = form;
+
+                    if (code.toString() === ver_code.toString()) {
+                        try {
+                            const { data: { token, userId, hashedPassword, fullName } } = await axios.post(`${URL}/signup`, {
+                                username, fullName: acc_fullName, password, email: emailAddress
+                            })
+            
+                            cookies.set('token', token);
+                            cookies.set('username', username);
+                            cookies.set('fullName', fullName);
+                            cookies.set('userId', userId);
+                            cookies.set('hashedPassword', hashedPassword);
+            
+                            window.location.reload();
+                        } catch (error) {
+                            setCode("");
+                            setEmailAddress("");
+                            setVerification(false);
+                            setError(true);
+                            setErrorMessage(`Signup Error: ${error.response?.data?.message}`);
+                        }
+                    } else {
+                        setCode("");
+                        setError(true);
+                        setErrorMessage("Signup Error: Verification code was wrong.");
+                        setEmailAddress("");
+                        setVerification(false);
+                    }
                 }
             }
         } else {
             try {
                 const response = await axios.post(`${URL}/login`, {
-                    username_email, password
+                    username_email, password: form_password
                 });
     
                 const { token, userId, fullName, username } = response.data;
     
                 cookies.set('token', token);
                 cookies.set('username', username);
-                cookies.set('fullName', fullName || form.fullName);
+                cookies.set('fullName', fullName);
                 cookies.set('userId', userId);
 
                 window.location.reload();
@@ -95,45 +134,60 @@ const Auth = () => {
                     Text Pigeon
                 </Typography>
                 <div className="auth__form-container_fields-content">
-                    <p>{isSignup ? 'Sign Up' : 'Sign In'}</p>
+                    <p>{verification ? ('Verification Code') : (isSignup ? 'Sign Up' : 'Sign In')}</p>
                     <form onSubmit={handleSubmit}>
-                        {isSignup && (
+                        {!verification && (isSignup && (
                             <div className="auth__form-container_fields-content_input">
-                                <label htmlFor="fullName">Full Name</label>
+                                <label htmlFor="form_fullName">Full Name</label>
                                 <input 
-                                    name="fullName" 
+                                    name="form_fullName" 
                                     type="text"
                                     placeholder="Full Name"
                                     onChange={handleChange}
                                     required
                                 />
                             </div>
-                        )}
-                        {isSignup && (
+                        ))}
+                        {verification && (
                             <div className="auth__form-container_fields-content_input">
-                                <label htmlFor="email">Email</label>
+                                <label htmlFor="ver_code">
+                                    A verification code was sent to <span style={{ textDecoration: "bold" }}>{emailAddress}</span>. 
+                                    Enter it below to verify this email address.
+                                </label>
                                 <input 
-                                    name="email" 
+                                    name="ver_code" 
+                                    type="text"
+                                    placeholder="6-digit Code"
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        )}
+                        {!verification && (isSignup && (
+                            <div className="auth__form-container_fields-content_input">
+                                <label htmlFor="form_email">Email</label>
+                                <input 
+                                    name="form_email" 
                                     type="text"
                                     placeholder="Email"
                                     onChange={handleChange}
                                     required
                                 />
                             </div>
-                        )}
-                        {isSignup && (
+                        ))}
+                        {!verification && (isSignup && (
                             <div className="auth__form-container_fields-content_input">
-                                <label htmlFor="username">Username</label>
+                                <label htmlFor="form_username">Username</label>
                                 <input 
-                                    name="username" 
+                                    name="form_username" 
                                     type="text"
                                     placeholder="Username"
                                     onChange={handleChange}
                                     required
                                 />
                             </div>
-                        )}
-                        {!isSignup && (
+                        ))}
+                        {!verification && (!isSignup && (
                             <div className="auth__form-container_fields-content_input">
                                 <label htmlFor="username_email">Username or Email</label>
                                 <input 
@@ -144,40 +198,41 @@ const Auth = () => {
                                     required
                                 />
                             </div>
-                        )}
-                        <div className="auth__form-container_fields-content_input">
-                            <label htmlFor="password">Password</label>
+                        ))}
+                        {!verification && (<div className="auth__form-container_fields-content_input">
+                            <label htmlFor="form_password">Password</label>
                                 <input 
-                                    name="password" 
+                                    name="form_password" 
                                     type="password"
                                     placeholder="Password"
                                     onChange={handleChange}
                                     required
                                 />
-                            </div>  
-                        {isSignup && (
+                            </div>)}  
+                        {!verification && (isSignup && (
                             <div className="auth__form-container_fields-content_input">
-                                <label htmlFor="confirmPassword">Confirm Password</label>
+                                <label htmlFor="form_confirmPassword">Confirm Password</label>
                                 <input 
-                                    name="confirmPassword" 
+                                    name="form_confirmPassword" 
                                     type="password"
                                     placeholder="Confirm Password"
                                     onChange={handleChange}
                                     required
                                 />
                             </div>
-                            )}
-                            { error && <div style={{ color:"red" }}>{errorMessage}</div>}
+                        ))}
+                        { error && <div style={{ color:"red" }}>{errorMessage}</div>}
                         <div className="auth__form-container_fields-content_button">
-                            <button>{isSignup ? "Sign Up" : "Sign In"}</button>
+                            <button>{verification ? ("Verify") : (isSignup ? "Sign Up" : "Sign In")}</button>
                         </div>
                     </form>
                     <div className="auth__form-container_fields-account">
                         <p>
-                            {isSignup ? "Already have an account?" : "Don't have an account?"}
-                             <span onClick={switchMode} style={{ textDecoration: 'underline', cursor: 'pointer' }}>
-                                {isSignup ? 'Sign In' : 'Sign Up'}
-                             </span>
+                            {verification ? ('The verification code may take a few minutes to send.') 
+                                : (isSignup ? "Already have an account?" : "Don't have an account?")}
+                            <span onClick={switchMode} style={{ textDecoration: 'underline', cursor: 'pointer' }}>
+                                {verification ? ("") : (isSignup ? 'Sign In' : 'Sign Up')}
+                            </span>
                         </p>
                     </div>
                 </div>

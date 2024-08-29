@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const StreamChat = require('stream-chat').StreamChat;
 const crypto = require('crypto');
 const Pool = require("pg").Pool;
+const nodemailer = require("nodemailer");
 
 require('dotenv').config();
 
@@ -115,4 +116,37 @@ const login = async (req, res) => {
     }
 }
 
-module.exports = { signup, login };
+const verification = async (req, res) => {
+    const { email } = req.body;
+
+    // Generate a 6-digit verification code
+    const code = Math.floor(100000 + Math.random() * 900000);
+
+    let transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+            user: process.env.EMAIL,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    // Set up the email options
+    let mailOptions = {
+        from: process.env.EMAIL,
+        to: email,
+        subject: 'Your Verification Code',
+        text: `Your verification code is ${code}`,
+    };
+
+    try {
+        // Send the email
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).send({ verification_code: code });
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).send('Error sending verification email.');
+    }
+}
+
+module.exports = { signup, login, verification };

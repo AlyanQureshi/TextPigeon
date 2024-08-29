@@ -67,7 +67,11 @@ const FriendsPage = () => {
     // Use Effect for getting Friend Requests
     useEffect(() => {
         const getFriendRequests = async () => {
-            const URL = "http://localhost:5000/friends/getFriendRequests";
+            const URL =
+                process.env.NODE_ENV === "production"
+                ? "/friends/getFriendRequests"
+                : "http://localhost:5000/friends/getFriendRequests";
+
             const username = cookies.get("username");
             try {
                 const { data: { names_arr } } = await axios.post(URL, { username });
@@ -102,7 +106,11 @@ const FriendsPage = () => {
     // Use Effect for getting current friends
     useEffect(() => {
         const getFriends = async () => {
-            const URL = "http://localhost:5000/friends/getFriends";
+            const URL =
+                process.env.NODE_ENV === "production"
+                ? "/friends/getFriends"
+                : "http://localhost:5000/friends/getFriends";
+
             const username = cookies.get("username");
             try {
                 const { data: { names_arr } } = await axios.post(URL, { username });
@@ -164,7 +172,10 @@ const FriendsPage = () => {
         setLoading(true);
         setRequestPending(true);
 
-        const URL = "http://localhost:5000/friends/friendRequest";
+        const URL =
+                process.env.NODE_ENV === "production"
+                ? "/friends/friendRequest"
+                : "http://localhost:5000/friends/friendRequest";
 
         const sender_username = cookies.get("username");
 
@@ -192,7 +203,12 @@ const FriendsPage = () => {
     const handleAcceptClick = async (username) => {
         setOpen(true);
         const client_username = cookies.get("username");
-        const URL = "http://localhost:5000/friends/acceptFriend";
+        
+        const URL =
+                process.env.NODE_ENV === "production"
+                ? "/friends/acceptFriend"
+                : "http://localhost:5000/friends/acceptFriend";
+
         try {
             const response = await axios.post(URL, {
                 accepted_username: username, client_username
@@ -208,7 +224,11 @@ const FriendsPage = () => {
     const handleDenyClick = async (username) => {
         setOpen(true);
         const client_username = cookies.get("username");
-        const URL = "http://localhost:5000/friends/denyFriend";
+
+        const URL =
+                process.env.NODE_ENV === "production"
+                ? "/friends/denyFriend"
+                : "http://localhost:5000/friends/denyFriend";
 
         try {
             const response = await axios.post(URL, {
@@ -226,7 +246,11 @@ const FriendsPage = () => {
         setConfirmation(false);
         setOpen(true);
         const client_username = cookies.get("username");
-        const URL = "http://localhost:5000/friends/unfriend";
+
+        const URL =
+                process.env.NODE_ENV === "production"
+                ? "/friends/unfriend"
+                : "http://localhost:5000/friends/unfriend";
 
         try {
             const response = await axios.post(URL, {

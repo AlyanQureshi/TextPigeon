@@ -26,7 +26,10 @@ const EditChannel = ({ setIsEditing }) => {
     const [selectedUsers, setSelectedUsers] = useState([])
     
     const grantAdmin = async (userId) => {
-        const URL = "http://localhost:5000/admin/grant";
+        const URL =
+                process.env.NODE_ENV === "production"
+                ? "/admin/grant"
+                : "http://localhost:5000/admin/grant";
 
         try {
             const response = await axios.post(URL, {
@@ -42,7 +45,10 @@ const EditChannel = ({ setIsEditing }) => {
     };
 
     const revokeAdmin = async (userId) => {
-        const URL = "http://localhost:5000/admin/revoke";
+        const URL =
+                process.env.NODE_ENV === "production"
+                ? "/admin/revoke"
+                : "http://localhost:5000/admin/revoke";
 
         try {
             const response = await axios.post(URL, {

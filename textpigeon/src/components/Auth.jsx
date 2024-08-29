@@ -45,7 +45,10 @@ const Auth = () => {
 
         const { form_username, form_password, form_confirmPassword, form_email, username_email, form_fullName } = form;
 
-        const URL = "http://localhost:5000/auth";
+        const URL =
+            process.env.NODE_ENV === "production"
+                ? "/auth"
+                : "http://localhost:5000/auth";
 
         if (isSignup) {
             if (!verification && (form_password !== form_confirmPassword)) {

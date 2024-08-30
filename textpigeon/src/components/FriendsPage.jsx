@@ -38,6 +38,8 @@ const FriendsHeader = () => (
     </div>
 );
 
+// const personal_username = cookies.get("username");
+
 const FriendsPage = () => {
     const { client } = useChatContext();
     const [activeTab, setActiveTab] = useState('current');
@@ -52,6 +54,8 @@ const FriendsPage = () => {
     const [unfriendConfirmation, setConfirmation] = useState(false);
     const [unfriendedUsername, setUnfriendedUsername] = useState("");
     const [filteredFriends, setFilteredFriends] = useState([]);
+    const personal_username = cookies.get("username");
+    // const [username, setUsername] = useState(personal_username);
 
     // do backend for getting friend requests // done
     // show the users through map or some shit in table // done
@@ -373,7 +377,7 @@ const FriendsPage = () => {
                                     Send
                                 </Button>
                             </div>
-                            <p className='fw-bold '>Incoming Friend Requests</p>
+                            <p className='fw-bold '>Incoming Friend Requests. (Your personal username: {personal_username})</p>
                         </div>
                         {friendRequests.length === 0 ? (
                             <h5 style={{ margin: '20px' }}>
@@ -496,7 +500,7 @@ const FriendsPage = () => {
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                        Are you sure you want to unfriend <span style={{ fontWeight: 'bold' }}>"{unfriendedUsername}"</span>?
+                        Are you sure you want to unfriend <span style={{ fontWeight: 'bold' }}>{unfriendedUsername}</span>?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

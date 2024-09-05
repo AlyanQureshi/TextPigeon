@@ -55,7 +55,6 @@ const FriendsPage = () => {
     const [unfriendedUsername, setUnfriendedUsername] = useState("");
     const [filteredFriends, setFilteredFriends] = useState([]);
     const personal_username = cookies.get("username");
-    // const [username, setUsername] = useState(personal_username);
 
     // do backend for getting friend requests // done
     // show the users through map or some shit in table // done
@@ -275,16 +274,6 @@ const FriendsPage = () => {
         setRequestPending(false);
     }
 
-    const logout = () => {
-        cookies.remove("token");
-        cookies.remove("userId");
-        cookies.remove("username");
-        cookies.remove("fullName");
-        cookies.remove("hashedPassword");
-
-        window.location.reload();
-    }
-
     const handleConfirmationOpen = (username) => {
         setUnfriendedUsername(username);
         setConfirmation(true);
@@ -434,7 +423,7 @@ const FriendsPage = () => {
 
     return (
         <div className='channel-list__container'>
-            <Sidebar logout={logout}/>
+            <Sidebar />
             <div className='channel-list__list__wrapper'>
                 <FriendsHeader />
                 <div className='channel-list__list__items'>

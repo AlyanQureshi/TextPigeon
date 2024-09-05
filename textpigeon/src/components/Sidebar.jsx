@@ -9,12 +9,28 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Cookies from 'universal-cookie';
+import { useNavigate } from 'react-router-dom';
 
-const Sidebar = ({ logout }) => {
+const cookies = new Cookies();
+
+const Sidebar = () => {
     const [open, setOpen] = useState(false);
+    const navigate = useNavigate();
 
     const handleClose = () => {
         setOpen(false);
+    }
+
+    const logout = () => {
+        cookies.remove("token");
+        cookies.remove("userId");
+        cookies.remove("username");
+        cookies.remove("fullName");
+        cookies.remove("hashedPassword");
+
+        setOpen(false);
+        navigate("/auth");
     }
 
     return (

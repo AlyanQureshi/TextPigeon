@@ -39,6 +39,7 @@ const App = () => {
             <Chat client={client} theme='team light'>
                 <Routes>
                     <Route path="/" element={<Navigate to="/home" />} />
+                    <Route path="/auth" element={<Auth />} />
                     <Route path="/friends" element={<FriendsPage />} />
                     <Route path="/home" element={
                         <div className='app__wrapper'>

@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { ChannelList, useChatContext } from 'stream-chat-react';
-import Cookies from 'universal-cookie';
 
 import { ChannelSearch, TeamChannelList, TeamChannelPreview, Sidebar } from './';
-
-const cookies = new Cookies();
 
 const CompanyHeader = () => (
     <div className="channel-list__header">
@@ -25,19 +22,9 @@ const ChannelListContent = ({ isCreating, setIsCreating, setCreateType, setIsEdi
 
     const filters = { members: { $in: [client.userID] } };
 
-    const logout = () => {
-        cookies.remove("token");
-        cookies.remove("userId");
-        cookies.remove("username");
-        cookies.remove("fullName");
-        cookies.remove("hashedPassword");
-
-        window.location.reload();
-    }
-
     return (
         <>
-            <Sidebar logout={logout}/>
+            <Sidebar />
             <div className="channel-list__list__wrapper">
                 <CompanyHeader />
                 <ChannelSearch setToggleContainer={setToggleContainer}/>

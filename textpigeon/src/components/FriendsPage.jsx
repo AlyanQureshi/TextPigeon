@@ -40,7 +40,7 @@ const FriendsHeader = () => (
 
 // const personal_username = cookies.get("username");
 
-const FriendsPage = () => {
+const FriendsPage = ({ setAuthToken }) => {
     const { client } = useChatContext();
     const [activeTab, setActiveTab] = useState('current');
     const [query, setQuery] = useState("");
@@ -55,25 +55,14 @@ const FriendsPage = () => {
     const [unfriendedUsername, setUnfriendedUsername] = useState("");
     const [filteredFriends, setFilteredFriends] = useState([]);
     const personal_username = cookies.get("username");
-
-    // do backend for getting friend requests // done
-    // show the users through map or some shit in table // done
-    // do backend for getting current friends and show it in the table of current friends by doing map or some shit // done
-    // do backend for accept logic, // done
-    // do backend for deny logic // done
-    // do backend for unfriend logic // done
-    // functionality for search in current friends // done
-    // change the user list to only friends list by using the current friends function in the user list component // done
-    // then make verification method
-    // then host
     
     // Use Effect for getting Friend Requests
     useEffect(() => {
         const getFriendRequests = async () => {
             const URL =
                 process.env.NODE_ENV === "production"
-                ? "/friends/getFriendRequests"
-                : "http://localhost:5000/friends/getFriendRequests";
+                ? "/api/friends/getFriendRequests"
+                : "http://localhost:5000/api/friends/getFriendRequests";
 
             const username = cookies.get("username");
             try {
@@ -111,8 +100,8 @@ const FriendsPage = () => {
         const getFriends = async () => {
             const URL =
                 process.env.NODE_ENV === "production"
-                ? "/friends/getFriends"
-                : "http://localhost:5000/friends/getFriends";
+                ? "/api/friends/getFriends"
+                : "http://localhost:5000/api/friends/getFriends";
 
             const username = cookies.get("username");
             try {
@@ -177,8 +166,8 @@ const FriendsPage = () => {
 
         const URL =
                 process.env.NODE_ENV === "production"
-                ? "/friends/friendRequest"
-                : "http://localhost:5000/friends/friendRequest";
+                ? "/api/friends/friendRequest"
+                : "http://localhost:5000/api/friends/friendRequest";
 
         const sender_username = cookies.get("username");
 
@@ -209,8 +198,8 @@ const FriendsPage = () => {
         
         const URL =
                 process.env.NODE_ENV === "production"
-                ? "/friends/acceptFriend"
-                : "http://localhost:5000/friends/acceptFriend";
+                ? "/api/friends/acceptFriend"
+                : "http://localhost:5000/api/friends/acceptFriend";
 
         try {
             const response = await axios.post(URL, {
@@ -230,8 +219,8 @@ const FriendsPage = () => {
 
         const URL =
                 process.env.NODE_ENV === "production"
-                ? "/friends/denyFriend"
-                : "http://localhost:5000/friends/denyFriend";
+                ? "/api/friends/denyFriend"
+                : "http://localhost:5000/api/friends/denyFriend";
 
         try {
             const response = await axios.post(URL, {
@@ -252,8 +241,8 @@ const FriendsPage = () => {
 
         const URL =
                 process.env.NODE_ENV === "production"
-                ? "/friends/unfriend"
-                : "http://localhost:5000/friends/unfriend";
+                ? "/api/friends/unfriend"
+                : "http://localhost:5000/api/friends/unfriend";
 
         try {
             const response = await axios.post(URL, {
@@ -423,7 +412,7 @@ const FriendsPage = () => {
 
     return (
         <div className='channel-list__container'>
-            <Sidebar />
+            <Sidebar setAuthToken={setAuthToken} />
             <div className='channel-list__list__wrapper'>
                 <FriendsHeader />
                 <div className='channel-list__list__items'>

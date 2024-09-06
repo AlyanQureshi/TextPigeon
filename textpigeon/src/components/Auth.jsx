@@ -16,7 +16,7 @@ const initialState = {
     ver_code: ''
 }
 
-const Auth = () => {
+const Auth = ({ setAuthToken }) => {
     const [form, setForm] = useState(initialState);
     const [isSignup, setIsSignup] = useState(false);
     const [error, setError] = useState(false);
@@ -28,7 +28,6 @@ const Auth = () => {
     const [acc_fullName, setFullName] = useState("");
     const [password, setPassword] = useState("");
     
-
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     }
@@ -47,8 +46,8 @@ const Auth = () => {
 
         const URL =
             process.env.NODE_ENV === "production"
-                ? "/auth"
-                : "http://localhost:5000/auth";
+                ? "/api/auth"
+                : "http://localhost:5000/api/auth";
 
         if (isSignup) {
             if (!verification && (form_password !== form_confirmPassword)) {
@@ -89,7 +88,7 @@ const Auth = () => {
                             cookies.set('userId', userId);
                             cookies.set('hashedPassword', hashedPassword);
             
-                            window.location.reload();
+                            setAuthToken(token);
                         } catch (error) {
                             setCode("");
                             setEmailAddress("");
@@ -119,8 +118,7 @@ const Auth = () => {
                 cookies.set('fullName', fullName);
                 cookies.set('userId', userId);
 
-                window.location.reload();
-                
+                setAuthToken(token);
             } catch (error) {
                 setError(true);
                 setErrorMessage(`Login Error: ${error.response?.data?.message}`);
@@ -154,7 +152,7 @@ const Auth = () => {
                         {verification && (
                             <div className="auth__form-container_fields-content_input">
                                 <label htmlFor="ver_code">
-                                    A verification code was sent to <span style={{ textDecoration: "bold" }}>{emailAddress}</span>. 
+                                    A verification code was sent to <span style={{ fontWeight: "bold" }}>{emailAddress}</span>. 
                                     Enter it below to verify this email address.
                                 </label>
                                 <input 

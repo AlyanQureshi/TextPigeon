@@ -28,8 +28,8 @@ const EditChannel = ({ setIsEditing }) => {
     const grantAdmin = async (userId) => {
         const URL =
                 process.env.NODE_ENV === "production"
-                ? "/admin/grant"
-                : "http://localhost:5000/admin/grant";
+                ? "/api/admin/grant"
+                : "http://localhost:5000/api/admin/grant";
 
         try {
             const response = await axios.post(URL, {
@@ -47,8 +47,8 @@ const EditChannel = ({ setIsEditing }) => {
     const revokeAdmin = async (userId) => {
         const URL =
                 process.env.NODE_ENV === "production"
-                ? "/admin/revoke"
-                : "http://localhost:5000/admin/revoke";
+                ? "/api/admin/revoke"
+                : "http://localhost:5000/api/admin/revoke";
 
         try {
             const response = await axios.post(URL, {

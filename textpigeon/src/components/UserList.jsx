@@ -67,7 +67,12 @@ const UserList = ({ setSelectedUsers, createType }) => {
                 return;
     
             setLoading(true);
-            const URL = "http://localhost:5000/friends/getFriends";
+            
+            const URL =
+                process.env.NODE_ENV === "production"
+                ? "/api/friends/getFriends"
+                : "http://localhost:5000/api/friends/getFriends";
+
             const username = cookies.get("username");
             try {
                 const { data: { names_arr } } = await axios.post(URL, { username });

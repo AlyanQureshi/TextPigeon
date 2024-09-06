@@ -17,14 +17,14 @@ const customChannelMessagingFilter = (channels) => {
     return channels.filter((channel) => channel.type === 'messaging');
 }
 
-const ChannelListContent = ({ isCreating, setIsCreating, setCreateType, setIsEditing, setToggleContainer }) => {
+const ChannelListContent = ({ isCreating, setIsCreating, setCreateType, setIsEditing, setToggleContainer, setAuthToken }) => {
     const { client } = useChatContext();
 
     const filters = { members: { $in: [client.userID] } };
 
     return (
         <>
-            <Sidebar />
+            <Sidebar setAuthToken={setAuthToken} />
             <div className="channel-list__list__wrapper">
                 <CompanyHeader />
                 <ChannelSearch setToggleContainer={setToggleContainer}/>
@@ -81,7 +81,7 @@ const ChannelListContent = ({ isCreating, setIsCreating, setCreateType, setIsEdi
     );
 }
 
-const ChannelListContainer = ({ setCreateType, setIsCreating, setIsEditing }) => {
+const ChannelListContainer = ({ setCreateType, setIsCreating, setIsEditing, setAuthToken }) => {
     const [toggleContainer, setToggleContainer] = useState(false);
 
     return (
@@ -90,7 +90,8 @@ const ChannelListContainer = ({ setCreateType, setIsCreating, setIsEditing }) =>
               <ChannelListContent 
                 setIsCreating={setIsCreating} 
                 setCreateType={setCreateType} 
-                setIsEditing={setIsEditing} 
+                setIsEditing={setIsEditing}
+                setAuthToken={setAuthToken} 
               />
             </div>
 
@@ -104,6 +105,7 @@ const ChannelListContainer = ({ setCreateType, setIsCreating, setIsEditing }) =>
                     setCreateType={setCreateType} 
                     setIsEditing={setIsEditing}
                     setToggleContainer={setToggleContainer}
+                    setAuthToken={setAuthToken}
                 />
             </div>
         </>

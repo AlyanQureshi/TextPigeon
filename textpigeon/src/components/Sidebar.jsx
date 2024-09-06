@@ -10,13 +10,13 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Cookies from 'universal-cookie';
-import { useNavigate } from 'react-router-dom';
+import { useChatContext } from 'stream-chat-react';
 
 const cookies = new Cookies();
 
-const Sidebar = () => {
+const Sidebar = ({ setAuthToken }) => {
     const [open, setOpen] = useState(false);
-    const navigate = useNavigate();
+    const { client } = useChatContext();
 
     const handleClose = () => {
         setOpen(false);
@@ -29,8 +29,10 @@ const Sidebar = () => {
         cookies.remove("fullName");
         cookies.remove("hashedPassword");
 
+        client.disconnectUser();
+
         setOpen(false);
-        navigate("/auth");
+        setAuthToken(null);
     }
 
     return (
@@ -72,7 +74,7 @@ const Sidebar = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>No</Button>
-                    <Button onClick={logout} autoFocus>
+                    <Button onClick={logout}>
                         Yes
                     </Button>
                 </DialogActions>

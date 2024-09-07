@@ -90,7 +90,7 @@ const ResultsDropdown = ({ teamChannels, directChannels, focusedId, loading, set
         </p>
       )}
       {!loading && !directChannels.length ? (
-        <p className='channel-search__res ults-header'>
+        <p className='channel-search__results-header'>
           <i>No direct messages found</i>
         </p>
       ) : (

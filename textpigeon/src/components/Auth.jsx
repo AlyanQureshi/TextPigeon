@@ -39,6 +39,12 @@ const Auth = ({ setAuthToken }) => {
         setForm(initialState);
     }
 
+    const validatePassword = (password) => {
+        // Password must be at least 6 characters long, contain at least one number, and one special character
+        const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,}$/;
+        return passwordRegex.test(password);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -53,6 +59,9 @@ const Auth = ({ setAuthToken }) => {
             if (!verification && (form_password !== form_confirmPassword)) {
                 setError(true);
                 setErrorMessage("Signup Error: Passwords do not match.");
+            } else if (!verification && !validatePassword(form_password)) {
+                setError(true);
+                setErrorMessage("Signup Error: Password must be at least 6 characters long, contain a number, and a special character.");
             } else if (!verification && (!validator.isEmail(form_email))) {
                 setError(true);
                 setErrorMessage("Signup Error: Email is not in a valid format.");

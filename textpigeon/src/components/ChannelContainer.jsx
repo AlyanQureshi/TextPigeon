@@ -59,7 +59,7 @@ const ChannelContainer = ({ isCreating, setIsCreating, isEditing, setIsEditing, 
     }
 
     if (open) {
-        return <div>Loading...</div>; // Optionally show a loading indicator
+        return <div>Loading...</div>;
     }
 
     const EmptyState = () => (

@@ -110,7 +110,7 @@ const Auth = ({ setAuthToken }) => {
                 const response = await axios.post(`${URL}/login`, {
                     username_email, password: form_password
                 });
-    
+                
                 const { token, userId, fullName, username } = response.data;
     
                 cookies.set('token', token);
